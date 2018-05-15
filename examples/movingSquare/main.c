@@ -20,10 +20,10 @@ void main(void){
 
     x += xInc;
     y += yInc;
-    if(x > 279 || x < 2){
+    if(x > 300 || x < -20){
       xInc = -xInc;
     }
-    if(y > 199 || y < 2){
+    if(y > 220 || y < -20){
       yInc = -yInc;
     }
 
