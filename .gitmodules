@@ -1,3 +1,6 @@
 [submodule "drivers/ssd1289"]
 	path = drivers/ssd1289
 	url = https://github.com/CanadianCommander/armboy_SSD1289lcdDriver.git
+[submodule "drivers/ArmboyInputDriver"]
+	path = drivers/ArmboyInputDriver
+	url = https://github.com/CanadianCommander/ArmboyInputDriver.git

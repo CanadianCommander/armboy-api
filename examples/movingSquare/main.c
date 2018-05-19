@@ -1,4 +1,5 @@
 #include "display.h"
+#include "input.h"
 #include <string.h>
 
 void main(void){
@@ -14,6 +15,11 @@ void main(void){
   r1.w = 40;
   r1.h = 40;
   for(;;){
+    if(cState.button1){
+      xInc = -xInc;
+      yInc = -yInc;
+    }
+
     for(int i =0; i < 100000;i++){
       asm("");
     }
@@ -65,7 +71,7 @@ void main(void){
 
     r1.x = 140;
     r1.y = y;
-    drawRectangle(&r1,0x001F);
+    drawRectangle(&r1,0x07E0);
 
 
   }
