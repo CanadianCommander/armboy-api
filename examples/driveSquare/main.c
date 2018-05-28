@@ -1,15 +1,25 @@
 #include "display.h"
 #include "input.h"
+#include "fs.h"
 #include <string.h>
 
 void main(void){
+
   loadDisplayDriver();
   initializeDisplayDefaults();
 
   loadInputDriver();
   initInputDefault();
 
+  loadFileSystemDriver();
+  initSDandFAT();
+
+  FileDescriptor img;
+  openFile("/BOOT/ball.data", &img);
+
   ControlState cState;
+
+  uint16_t color = 0x001F;
 
   Rec r1;
   r1.x = 0;
@@ -24,6 +34,10 @@ void main(void){
   clear.h =42;
   for(;;){
     getControlState(&cState);
+
+    if(cState.button1){
+      color += 0xF;
+    }
 
     if(cState.dPadUp){
       clear.x = r1.x;
@@ -54,7 +68,7 @@ void main(void){
       asm("");
     }
 
-    drawRectangle(&r1,0x001F);
+    drawRectangle(&r1, color);
 
 
   }

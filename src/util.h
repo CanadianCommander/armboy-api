@@ -1,7 +1,9 @@
 #ifndef UTIL_H_
 #define UITL_H_
 
+#ifndef NULL
 #define NULL 0
+#endif 
 
 #define SYS_CALL(id, func, arg) \
   asm(                        \

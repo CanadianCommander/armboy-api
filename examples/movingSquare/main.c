@@ -15,10 +15,6 @@ void main(void){
   r1.w = 40;
   r1.h = 40;
   for(;;){
-    if(cState.button1){
-      xInc = -xInc;
-      yInc = -yInc;
-    }
 
     for(int i =0; i < 100000;i++){
       asm("");

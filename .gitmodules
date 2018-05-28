@@ -4,3 +4,6 @@
 [submodule "drivers/ArmboyInputDriver"]
 	path = drivers/ArmboyInputDriver
 	url = https://github.com/CanadianCommander/ArmboyInputDriver.git
+[submodule "drivers/armboy-fs"]
+	path = drivers/armboy-fs
+	url = https://github.com/CanadianCommander/armboy-fs.git
