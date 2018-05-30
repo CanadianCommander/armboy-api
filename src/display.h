@@ -1,6 +1,7 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 #include <stdint.h>
+#include "fs.h"
 
 //display driver id
 #define DISPLAY_DRIVER_ID 1
@@ -49,4 +50,10 @@ void drawBitmap(RGBBitmap * b, int x, int y, float scale);
 */
 void drawRectangle(Rec * r, uint16_t color);
 
+
+/**
+  read a 24 bit RGB file and convert it to 16 bit RGB and place it in rgb16Buffer.
+  @param count number of bytes to read from file note buffer will have count - (count / 3) bytes in it
+*/
+void readRGB24File(uint16_t * rgb16Buffer, uint32_t count, FileDescriptor * fd);
 #endif /*DISPLAY_H_*/

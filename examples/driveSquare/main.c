@@ -15,60 +15,70 @@ void main(void){
   initSDandFAT();
 
   FileDescriptor img;
-  openFile("/BOOT/ball.data", &img);
+  openFile("/BOOT/armboy_logo.data", &img);
+
+  RGBBitmap bmp;
+  bmp.width = 128;
+  bmp.height = 106;
+  uint8_t rgbBuff[128*128*2];
+  memset(rgbBuff, 0, 128*128*2);
+  bmp.rgbData = (uint16_t*)rgbBuff;
+  readRGB24File(bmp.rgbData, 128*106*3, &img);
 
   ControlState cState;
 
   uint16_t color = 0x001F;
 
   Rec r1;
-  r1.x = 0;
-  r1.y = 0;
+  r1.x = 100;
+  r1.y = 50;
   r1.w = 40;
   r1.h = 40;
-
-  Rec clear;
-  clear.x =0;
-  clear.y =0;
-  clear.w =42;
-  clear.h =42;
+  float scale = 1.0f;
   for(;;){
     getControlState(&cState);
 
     if(cState.button1){
-      color += 0xF;
+      FileDescriptor img2;
+      openFile("/BOOT/eth_large.data", &img2);
+      bmp.width = 128;
+      bmp.height = 128;
+      memset(rgbBuff, 0, 128*128*2);
+      readRGB24File(bmp.rgbData, 128*128*3, &img2);
+    }
+
+    if(cState.button4){
+      scale += 0.1f;
+      for(int i =0; i < 1000000; i++){
+        asm("");
+      }
+      clearDisplay(0x00);
+    }
+
+    if(cState.button2){
+      if(scale >= 1.0f){
+        scale -= 0.1f;
+      }
+      for(int i =0; i < 1000000; i++){
+        asm("");
+      }
+      clearDisplay(0x00);
     }
 
     if(cState.dPadUp){
-      clear.x = r1.x;
-      clear.y = r1.y + 39;
-      drawRectangle(&clear,0x0000);
-      r1.y --;
+      r1.y -=1;
     }
     if(cState.dPadLeft){
-      clear.x = r1.x + 39;
-      clear.y = r1.y;
-      drawRectangle(&clear,0x0000);
-      r1.x --;
+      r1.x -=1;
     }
     if(cState.dPadRight){
-      clear.x = r1.x - 39;
-      clear.y = r1.y;
-      drawRectangle(&clear,0x0000);
-      r1.x ++;
+      r1.x +=1;
     }
     if(cState.dPadDown){
-      clear.x = r1.x;
-      clear.y = r1.y - 39;
-      drawRectangle(&clear,0x0000);
-      r1.y ++;
+      r1.y +=1;
     }
 
-    for(int i =0; i < 100000;i++){
-      asm("");
-    }
-
-    drawRectangle(&r1, color);
+    drawBitmap(&bmp, r1.x, r1.y,  scale);
 
 
   }
