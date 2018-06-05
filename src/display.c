@@ -44,6 +44,19 @@ void drawRectangle(Rec * r, uint16_t color){
   SYS_CALL(DISPLAY_DRIVER_ID,DISPLAY_FUNCTION_DRAW_RECTANGLE,&driverArg);
 }
 
+void setClipRegion(uint16_t x, uint16_t y, uint16_t w, uint16_t h){
+  SetClipRegionCall scrc;
+  scrc.x = x;
+  scrc.y = y;
+  scrc.w = w;
+  scrc.h = h;
+  SYS_CALL(DISPLAY_DRIVER_ID, DISPLAY_FUNCTION_SET_CLIP, &scrc);
+}
+
+void clearClipRegion(){
+  SYS_CALL(DISPLAY_DRIVER_ID, DISPLAY_FUNCTION_CLEAR_CLIP, NULL);
+}
+
 #define RGB24_CONVERT_BUFFER 510
 static uint16_t __Rgb24toRgb16(uint8_t r, uint8_t g, uint8_t b);
 void readRGB24File(uint16_t * rgb16Buffer, uint32_t count, FileDescriptor * fd){

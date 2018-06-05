@@ -11,6 +11,8 @@
 #define DISPLAY_FUNCTION_CLEAR_DISPLAY  2
 #define DISPLAY_FUNCTION_DRAW_BITMAP    3
 #define DISPLAY_FUNCTION_DRAW_RECTANGLE 4
+#define DISPLAY_FUNCTION_SET_CLIP       5
+#define DISPLAY_FUNCTION_CLEAR_CLIP     6
 
 typedef struct {
   uint16_t width;
@@ -50,6 +52,10 @@ void drawBitmap(RGBBitmap * b, int x, int y, float scale);
 */
 void drawRectangle(Rec * r, uint16_t color);
 
+
+void setClipRegion(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+
+void clearClipRegion();
 
 /**
   read a 24 bit RGB file and convert it to 16 bit RGB and place it in rgb16Buffer.
