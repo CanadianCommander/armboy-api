@@ -212,6 +212,58 @@ void logicInit(GameState * gs){
   memset(gs->activeBlocks, 0, BLOCKS_PER_SHAPE*sizeof(uint16_t));
 }
 
+void indexToXY(uint16_t index, uint16_t * x, uint16_t * y){
+  *x = index % PLAY_AREA_W;
+  *y = index / PLAY_AREA_W;
+}
+
+void XYtoIndex(uint16_t x, uint16_t y, uint16_t * index){
+  *index = y*PLAY_AREA_W + x;
+}
+
+bool rotateBlocks(uint16_t* indices, uint16_t count, uint8_t * playArea, bool abortOnCollide){
+  uint16_t refX;
+  uint16_t refY;
+  uint8_t color;
+  color = playArea[indices[1]];
+  indexToXY(indices[1], &refX, &refY);
+
+  setCells(indices, count, BLOCK_NONE, playArea);
+
+  for(int i =0; i < count; i ++){
+    uint16_t x, y;
+    indexToXY(indices[i], &x, &y);
+    x = x - refX;
+    y = y - refY;
+    uint16_t oldX = x;
+    x = -y;
+    y = oldX;
+    x = x + refX;
+    y = y + refY;
+    XYtoIndex(x, y, (indices + i));
+    if(abortOnCollide && playArea[indices[i]] != BLOCK_NONE){
+      return false;
+    }
+  }
+
+  setCells(indices, count, color, playArea);
+  return true;
+}
+
+bool isRotateCollision(uint16_t * indices, uint16_t count, uint8_t * playArea){
+  uint16_t indexCpy[count];
+  memcpy(indexCpy, indices, count*sizeof(uint16_t));
+  uint8_t fakePlayArea[PLAY_AREA_W*PLAY_AREA_H];
+  memcpy(fakePlayArea, playArea, PLAY_AREA_W*PLAY_AREA_H);
+
+  if(!rotateBlocks(indexCpy, count, fakePlayArea, true)){
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
 bool checkControls(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs){
   ControlState cState;
   getControlState(&cState);
@@ -229,6 +281,13 @@ bool checkControls(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs){
     }
     else if (cState.dPadDown){
         update(sStrip, playArea, gs);
+    }
+    else if (cState.dPadUp){
+      if(!isRotateCollision(gs->activeBlocks, BLOCKS_PER_SHAPE, playArea)){
+        rotateBlocks(gs->activeBlocks, BLOCKS_PER_SHAPE, playArea, false);
+        for(int i =0; i < 999999; i++)asm("");
+      }
+
     }
 
     return false;
