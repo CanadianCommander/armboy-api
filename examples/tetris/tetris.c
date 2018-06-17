@@ -154,7 +154,7 @@ bool isCollide(uint16_t * indices, uint16_t count, uint8_t * playArea){
       //space already in use
       return true;
     }
-    else if (indices[i] > PLAY_AREA_W*PLAY_AREA_H){
+    else if (indices[i] >= PLAY_AREA_W*PLAY_AREA_H){
       // off bottom
       return true;
     }
@@ -244,6 +244,9 @@ bool rotateBlocks(uint16_t* indices, uint16_t count, uint8_t * playArea, bool ab
     if(abortOnCollide && playArea[indices[i]] != BLOCK_NONE){
       return false;
     }
+    if(x >= PLAY_AREA_W){
+      return false;
+    }
   }
 
   setCells(indices, count, color, playArea);
@@ -298,7 +301,7 @@ bool checkControls(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs){
 }
 
 void shiftGameBoard(int line, uint8_t * playArea){
-  for(int i =line; i >= 0; i-= PLAY_AREA_W){
+  for(int i =line - PLAY_AREA_W; i >= 0; i-= PLAY_AREA_W){
     uint16_t lineIndices[PLAY_AREA_W];
     for(int z =0; z < PLAY_AREA_W; z++){
       lineIndices[z] = i + z;
