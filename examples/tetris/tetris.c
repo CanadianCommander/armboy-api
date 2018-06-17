@@ -43,9 +43,17 @@
 #define BLOCK_SEPARATION 1
 #define BLOCK_SCALE 1.2f
 
+/** meta game settings **/
+#define INITLA_GAME_SPEED   70
+#define SCORE_PER_LINE      3
+#define SPEED_UP_LINE_REQ   1
+
 typedef struct {
   uint16_t activeBlocks[BLOCKS_PER_SHAPE];
   uint8_t activeBlockType;
+  uint32_t gameDelay;
+  uint32_t lineCount;
+  uint32_t score;
   bool isActive;
 } GameState;
 
@@ -93,7 +101,7 @@ void main(void){
   uint8_t playArea[PLAY_AREA_W*PLAY_AREA_H];
   memset(playArea, BLOCK_NONE, PLAY_AREA_W*PLAY_AREA_H);
 
-  clearDisplay(0xA516);
+  clearDisplay(0x1863);
   Rec playAreaR;
   playAreaR.x = PLAY_AREA_X_OFFSET;
   playAreaR.y = PLAY_AREA_Y_OFFSET;
@@ -104,12 +112,11 @@ void main(void){
   GameState gs;
   logicInit(&gs);
   for(;;){
-    for(int i =0; i < 10;i++){
+    for(int i =0; i < 4;i++){
       if(checkControls(&blockSpriteStrip, playArea, &gs)){
         break;
       }
-      for(int z = 0; z < 100000; z++)asm("");
-      draw(&blockSpriteStrip, playArea);
+      sleep(gs.gameDelay);
     }
 
     update(&blockSpriteStrip, playArea, &gs);
@@ -209,6 +216,9 @@ void shiftCells(uint16_t * indices, uint16_t count, int shift, uint8_t * playAre
 void logicInit(GameState * gs){
   gs->isActive = false;
   gs->activeBlockType = BLOCK_NONE;
+  gs->gameDelay = INITLA_GAME_SPEED;
+  gs->lineCount = 0;
+  gs->score = 0;
   memset(gs->activeBlocks, 0, BLOCKS_PER_SHAPE*sizeof(uint16_t));
 }
 
@@ -275,20 +285,24 @@ bool checkControls(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs){
     if(cState.dPadLeft){
       if(!isCollideLeftRight(gs->activeBlocks, BLOCKS_PER_SHAPE, -1, playArea)){
         shiftCells(gs->activeBlocks, BLOCKS_PER_SHAPE, -1, playArea);
+        draw(sStrip, playArea);
       }
     }
     else if(cState.dPadRight){
       if(!isCollideLeftRight(gs->activeBlocks, BLOCKS_PER_SHAPE, 1, playArea)){
         shiftCells(gs->activeBlocks, BLOCKS_PER_SHAPE, 1, playArea);
+        draw(sStrip, playArea);
       }
     }
     else if (cState.dPadDown){
         update(sStrip, playArea, gs);
+        draw(sStrip, playArea);
     }
     else if (cState.dPadUp){
       if(!isRotateCollision(gs->activeBlocks, BLOCKS_PER_SHAPE, playArea)){
         rotateBlocks(gs->activeBlocks, BLOCKS_PER_SHAPE, playArea, false);
-        for(int i =0; i < 999999; i++)asm("");
+        sleep(35);
+        draw(sStrip, playArea);
       }
 
     }
@@ -313,6 +327,7 @@ void shiftGameBoard(int line, uint8_t * playArea){
 #define BLINK_COUNT 5
 #define BLINK_DELAY 100999
 void removeFullLines(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs){
+  uint32_t linesRemoved = 0;
   for(int i = 0; i < PLAY_AREA_W*PLAY_AREA_H; i += PLAY_AREA_W){
     int z;
     for(z =0; z < PLAY_AREA_W; z++){
@@ -322,6 +337,12 @@ void removeFullLines(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs){
     }
 
     if(z == PLAY_AREA_W){
+      linesRemoved++;
+      //update meta game info (btw this should not be hear. This will make code matinance really hard. fine for small prog though)
+      gs->lineCount++;
+      uint32_t newGameDelay = INITLA_GAME_SPEED - (uint32_t)(gs->lineCount/SPEED_UP_LINE_REQ);
+      gs->gameDelay = newGameDelay > 0 ? newGameDelay : 1;
+
       //blink line to remove.
       uint16_t lineIndices[PLAY_AREA_W];
       for(int k =0; k < PLAY_AREA_W; k++){
@@ -340,6 +361,8 @@ void removeFullLines(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs){
       draw(sStrip, playArea);
     }
   }
+
+  gs->score += SCORE_PER_LINE*linesRemoved; //score multiplyer !!!
 }
 
 void spawnSquare(uint8_t * playArea, GameState * gs);

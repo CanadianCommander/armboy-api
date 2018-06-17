@@ -9,8 +9,11 @@
 #define CF_RANDOM 0
 #define CF_SLEEP  1
 
+/** return random 32 bit number (from TRANG hardware) **/
 uint32_t rand(void);
 
+/** sleep for ms milliseconds **/
+void sleep(uint32_t ms);
 
 
 
