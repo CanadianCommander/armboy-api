@@ -3,6 +3,7 @@
 #include "fs.h"
 #include "core.h"
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <memory.h>
 
@@ -33,8 +34,8 @@
 #define PLAY_AREA_UNIT_W_H 12 // cell size
 #define PLAY_AREA_W 10 // width in cells
 #define PLAY_AREA_H 20 // height in cells
-#define PLAY_AREA_X_OFFSET 90;// not really centered on screen but "looks" more centered due to screen physical shape
-#define PLAY_AREA_Y_OFFSET 0;
+#define PLAY_AREA_X_OFFSET 90// not really centered on screen but "looks" more centered due to screen physical shape
+#define PLAY_AREA_Y_OFFSET 0
 
 /** block sprite strip (blocks.raw) **/
 #define BLOCK_STRIP_W 76
@@ -54,10 +55,11 @@ typedef struct {
   uint32_t gameDelay;
   uint32_t lineCount;
   uint32_t score;
+  Font * sysFontPtr;
   bool isActive;
 } GameState;
 
-void draw(RGBBitmap * blockSheet, uint8_t * playArea);
+void draw(RGBBitmap * blockSheet, uint8_t * playArea, GameState * gs);
 void logicInit(GameState * gs);
 void update(RGBBitmap * blockSheet, uint8_t * playArea, GameState * gs);
 bool checkControls(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs);
@@ -83,9 +85,17 @@ void main(void){
   blockSpriteStrip.height = BLOCK_STRIP_H;
   blockSpriteStrip.rgbData = (uint16_t*)blockSpriteImgData;
 
-  FileDescriptor blockStripFile;
-  if(openFile("/blocks.data", &blockStripFile)){
+  /** font **/
+  Font sysFont;
+  RGBBitmap sysFontBmp;
+  uint8_t fontData[96*33*2];
+  sysFont.fontBmp = &sysFontBmp;
+  sysFont.fontBmp->rgbData = (uint16_t *)fontData;
+
+  FileDescriptor blockStripFile, fontFile;
+  if(openFile("/blocks.data", &blockStripFile) && openFile("sysFont/8x8font.data", &fontFile)){
     readRGB24File(blockSpriteStrip.rgbData, BLOCK_STRIP_W*BLOCK_STRIP_H*3, &blockStripFile);
+    loadFont(&sysFont, 12, 8, 8, 4, true, &fontFile);
   }
   else {
     //the magic error box
@@ -109,7 +119,13 @@ void main(void){
   playAreaR.h = PLAY_AREA_H*PLAY_AREA_UNIT_W_H;
   drawRectangle(&playAreaR, 0x0000);
 
+
+  drawText(&sysFont, "ARMBoy" , 0,0, 1.0f);
+  drawText(&sysFont, "TETRIS" , 16,9, 1.0f);
+  drawText(&sysFont, "-----------" , 0,18, 1.0f);
+
   GameState gs;
+  gs.sysFontPtr = &sysFont;
   logicInit(&gs);
   for(;;){
     for(int i =0; i < 4;i++){
@@ -120,7 +136,7 @@ void main(void){
     }
 
     update(&blockSpriteStrip, playArea, &gs);
-    draw(&blockSpriteStrip, playArea);
+    draw(&blockSpriteStrip, playArea, &gs);
   }
 }
 
@@ -146,7 +162,21 @@ void drawBlock(uint16_t gridX, uint16_t gridY, uint8_t blockType, RGBBitmap * bl
   }
 }
 
-void draw(RGBBitmap * blockSheet, uint8_t * playArea){
+void drawScore(uint8_t * playArea, GameState * gs, int x, int y, float scale){
+  char tmp[33];
+  memset(tmp, 0, 33);
+
+  uint16_t nxt = drawText(gs->sysFontPtr, "Score - ", x, y, scale);
+  armBoyItoa(gs->score, tmp, 10);
+  drawText(gs->sysFontPtr, tmp, nxt, y, scale);
+
+  nxt = drawText(gs->sysFontPtr, "Lines - ", x, y + 18*scale, scale);
+  armBoyItoa(gs->lineCount, tmp, 10);
+  drawText(gs->sysFontPtr, tmp, nxt, y + 18*scale, scale);
+}
+
+void draw(RGBBitmap * blockSheet, uint8_t * playArea, GameState * gs){
+  drawScore(playArea, gs, PLAY_AREA_X_OFFSET + PLAY_AREA_W*PLAY_AREA_UNIT_W_H, 9, 1.0f);
   for(uint32_t i =0; i < (PLAY_AREA_W*PLAY_AREA_H); i++){
     drawBlock(i % PLAY_AREA_W, i / PLAY_AREA_W, playArea[i], blockSheet);
   }
@@ -285,24 +315,24 @@ bool checkControls(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs){
     if(cState.dPadLeft){
       if(!isCollideLeftRight(gs->activeBlocks, BLOCKS_PER_SHAPE, -1, playArea)){
         shiftCells(gs->activeBlocks, BLOCKS_PER_SHAPE, -1, playArea);
-        draw(sStrip, playArea);
+        draw(sStrip, playArea, gs);
       }
     }
     else if(cState.dPadRight){
       if(!isCollideLeftRight(gs->activeBlocks, BLOCKS_PER_SHAPE, 1, playArea)){
         shiftCells(gs->activeBlocks, BLOCKS_PER_SHAPE, 1, playArea);
-        draw(sStrip, playArea);
+        draw(sStrip, playArea, gs);
       }
     }
     else if (cState.dPadDown){
         update(sStrip, playArea, gs);
-        draw(sStrip, playArea);
+        draw(sStrip, playArea, gs);
     }
     else if (cState.dPadUp){
       if(!isRotateCollision(gs->activeBlocks, BLOCKS_PER_SHAPE, playArea)){
         rotateBlocks(gs->activeBlocks, BLOCKS_PER_SHAPE, playArea, false);
         sleep(35);
-        draw(sStrip, playArea);
+        draw(sStrip, playArea, gs);
       }
 
     }
@@ -351,14 +381,14 @@ void removeFullLines(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs){
 
       for(int p = 0; p < BLINK_COUNT; p++){
         setCells(lineIndices, PLAY_AREA_W, BLOCK_NONE, playArea);
-        draw(sStrip, playArea);
+        draw(sStrip, playArea, gs);
         for(int e =0; e < BLINK_DELAY; e++)asm("");
         setCells(lineIndices, PLAY_AREA_W, BLOCK_ORANGE, playArea);
-        draw(sStrip, playArea);
+        draw(sStrip, playArea, gs);
       }
 
       shiftGameBoard(i, playArea);
-      draw(sStrip, playArea);
+      draw(sStrip, playArea, gs);
     }
   }
 
@@ -400,7 +430,7 @@ void update(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs){
 
     //drop new block
     gs->isActive = true;
-    uint8_t rndBlock = rand()%5;
+    uint8_t rndBlock = randomTRNG()%5;
 
     switch(rndBlock){
       case BLOCK_CUBE:
@@ -422,15 +452,11 @@ void update(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs){
         return;//wtf
     }
 
-    gs->activeBlockType = 1 + rand()%6;
+    gs->activeBlockType = 1 + randomTRNG()%6;
     if(isCollide(gs->activeBlocks, BLOCKS_PER_SHAPE, playArea)){
       //game over!!! do some thing
-      Rec r1;
-      r1.x = PLAY_AREA_X_OFFSET;
-      r1.y = 50;
-      r1.w = PLAY_AREA_W*PLAY_AREA_UNIT_W_H;
-      r1.h = 50;
-      drawRectangle(&r1,0xF800);
+      drawText(gs->sysFontPtr, "GAME OVER" , 10, 50, 4.0f);
+      drawScore(playArea, gs, 10, 100, 3.0f);
       for(;;){// DEAD LOOP!
         asm("");
       }

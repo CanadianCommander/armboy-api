@@ -21,6 +21,14 @@ typedef struct {
 } RGBBitmap;
 
 typedef struct {
+  RGBBitmap * fontBmp;
+  uint16_t charW, charH;
+  uint16_t charsPerLine;
+  uint16_t countLines;
+  bool alternating;
+} Font;
+
+typedef struct {
   int x;
   int y;
   uint16_t w;
@@ -54,12 +62,30 @@ void drawRectangle(Rec * r, uint16_t color);
 
 
 void setClipRegion(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+void setClipRegionRect(Rec * r);
 
 void clearClipRegion();
 
 /**
+  draws text starting at x / y (top left) untile end of string.
+  @return the x positon of the end of the string on the screen. (so you can draw more text)
+*/
+int drawText(Font * font, char * text, int x, int y, float scale);
+
+/**
+  read font from file. not buffers must have been already allocated with enough
+  size to hold the font bitmap
+  @param charsPerLine the number of characters per line in the bitmap
+  @param charWidth / charHeight the width / height of a single character
+  @param countLines the number of character lines in the font bmp
+  @param alter, true means alternating characters on each line Ex. AGBHCIDJEKF instead of ABCDEFGHIJK (so bitmap fonts are in
+    this format, god knows why)
+**/
+void loadFont(Font * f, uint16_t charsPerLine, uint16_t charWidth, uint16_t charHeight, uint16_t countLines, bool alter, FileDescriptor * fd);
+
+/**
   read a 24 bit RGB file and convert it to 16 bit RGB and place it in rgb16Buffer.
-  @param count number of bytes to read from file note buffer will have count - (count / 3) bytes in it
+  @param count number of bytes to read from file note buffer will have [count - (count / 3)] bytes in it
 */
 void readRGB24File(uint16_t * rgb16Buffer, uint32_t count, FileDescriptor * fd);
 #endif /*DISPLAY_H_*/
