@@ -2,12 +2,14 @@
 #include "input.h"
 #include <string.h>
 
+int x = 2;
+int y = 2;
+int bssStoif[128];
+
 void main(void){
   loadDisplayDriver();
   initializeDisplayDefaults();
 
-  int x = 2;
-  int y = 2;
   int xInc = 1;
   int yInc = 1;
 

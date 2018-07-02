@@ -1,6 +1,21 @@
 	.syntax	unified
 	.arch	armv7-m
 
+	.section .binary_layout
+  .globl __binary_layout
+__binary_layout:
+  .long	__text_start__
+  .long __text_end__
+  .long __got_start__
+  .long __got_end__
+	.long	__data_start__
+	.long	__data_end__
+  .long __bss_start__
+  .long __bss_end__
+  .long 0x1024       /* !!! HEAP SIZE !!! */
+	.long 0x51200			 /* !!! STACK SIZE!!! */
+  .size __binary_layout, . - __binary_layout
+
   .section .jump_vector
   .align	2
   .globl	__jump_vector

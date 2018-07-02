@@ -7,6 +7,7 @@ SECTIONS
 {
 	.text :
 	{
+    KEEP(*(.binary_layout))
 		KEEP(*(.jump_vector))
     __text_start__ = .;
 		*(.text*)
@@ -97,7 +98,7 @@ SECTIONS
 	.bss :
 	{
 		__bss_start__ = .;
-		*(.bss*)
+		KEEP(*(.bss*))
 		*(COMMON)
 		__bss_end__ = .;
 	} > FLASH
