@@ -4,18 +4,8 @@
 #include <string.h>
 
 void main(void){
-
-  loadDisplayDriver();
-  initializeDisplayDefaults();
-
-  loadInputDriver();
-  initInputDefault();
-
-  loadFileSystemDriver();
-  initSDandFAT();
-
   FileDescriptor img;
-  openFile("/BOOT/armboy_logo.data", &img);
+  openFile("/boot/armboy_logo.data", &img);
 
   RGBBitmap bmp;
   bmp.width = 128;
@@ -40,7 +30,7 @@ void main(void){
 
     if(cState.button1){
       FileDescriptor img2;
-      openFile("/BOOT/eth_large.data", &img2);
+      openFile("/boot/eth_large.data", &img2);
       bmp.width = 128;
       bmp.height = 128;
       memset(rgbBuff, 0, 128*128*2);

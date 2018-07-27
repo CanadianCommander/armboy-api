@@ -1,9 +1,14 @@
 #include "input.h"
+#include "core.h"
 #include "util.h"
 #include "../drivers/ArmboyInputDriver/src/inputSyscall.h"
 
 void loadInputDriver(){
   LOAD_KERNEL_MOD(INPUT_DRIVER_ID);
+}
+
+bool isInputDriverLoaded(){
+  return isLoaded(INPUT_DRIVER_ID);
 }
 
 void initInputDefault(){

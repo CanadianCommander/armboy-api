@@ -64,19 +64,7 @@ void logicInit(GameState * gs);
 void update(RGBBitmap * blockSheet, uint8_t * playArea, GameState * gs);
 bool checkControls(RGBBitmap * sStrip, uint8_t * playArea, GameState * gs);
 
-void sysInit(){
-  loadDisplayDriver();
-  initializeDisplayDefaults();
-
-  loadInputDriver();
-  initInputDefault();
-
-  loadFileSystemDriver();
-  initSDandFAT();
-}
-
 void main(void){
-  sysInit();
 
   /** load sprite strip for blocks **/
   RGBBitmap blockSpriteStrip;
@@ -93,7 +81,7 @@ void main(void){
   sysFont.fontBmp->rgbData = (uint16_t *)fontData;
 
   FileDescriptor blockStripFile, fontFile;
-  if(openFile("/blocks.data", &blockStripFile) && openFile("sysFont/8x8font.data", &fontFile)){
+  if(openFile("/blocks.data", &blockStripFile) && openFile("/sysfonts/8x8font.data", &fontFile)){
     readRGB24File(blockSpriteStrip.rgbData, BLOCK_STRIP_W*BLOCK_STRIP_H*3, &blockStripFile);
     loadFont(&sysFont, 12, 8, 8, 4, true, &fontFile);
   }
@@ -105,6 +93,7 @@ void main(void){
     r1.w = 40;
     r1.h = 40;
     drawRectangle(&r1,0xF800);
+    return;
   }
 
   /** setup play area **/

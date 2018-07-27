@@ -31,3 +31,8 @@ char * armBoyItoa(int num, char * str, int base){
   }
   return str;
 }
+
+bool isLoaded(uint32_t mid){
+  SYS_CALL(CORE_FUNCTIONS_ID, CF_IS_LOADED, (void *)&mid);
+  return (bool)mid;
+}

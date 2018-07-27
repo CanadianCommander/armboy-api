@@ -1,6 +1,7 @@
 #ifndef FS_H_
 #define FS_H_
 #include <stdint.h>
+#include <stdbool.h>
 #include "../drivers/armboy-fs/src/FAT32/fsSysCalls.h"
 
 //file system driver id
@@ -14,6 +15,13 @@
 #define FS_FUNCTION_SEEK_FILE 5
 
 void loadFileSystemDriver();
+
+
+/**
+  true if file system driver is loaded
+*/
+bool isFileSystemDriverLoaded();
+
 
 
 void initSDandFAT();

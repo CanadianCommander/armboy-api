@@ -12,8 +12,8 @@ __binary_layout:
 	.long	__data_end__
   .long __bss_start__
   .long __bss_end__
-  .long 0x400       /* !!! HEAP SIZE !!! */
-	.long 0xc800			 /* !!! STACK SIZE!!! */
+  .long 0x1024       /* !!! HEAP SIZE !!! */
+	.long 0x51200			 /* !!! STACK SIZE!!! */
   .size __binary_layout, . - __binary_layout
 
   .section .jump_vector

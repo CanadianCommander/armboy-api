@@ -1,8 +1,13 @@
 #include "fs.h"
+#include "core.h"
 #include "util.h"
 
 void loadFileSystemDriver(void){
   LOAD_KERNEL_MOD(FILE_SYSTEM_DRIVER_ID);
+}
+
+bool isFileSystemDriverLoaded(){
+  return isLoaded(FILE_SYSTEM_DRIVER_ID);
 }
 
 void initSDandFAT(void){

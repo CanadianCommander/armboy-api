@@ -1,6 +1,7 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 #include <stdint.h>
+#include <stdbool.h>
 #include "fs.h"
 
 //display driver id
@@ -39,6 +40,11 @@ typedef struct {
   load display driver kernel module.
 */
 void loadDisplayDriver();
+
+/**
+  true if display driver loaded
+*/
+bool isDisplayDriverLoaded();
 
 /**
   initialize the display for drawing, using the default pin assignment.

@@ -1,6 +1,7 @@
 #ifndef INPUT_H_
 #define INPUT_H_
 #include <stdint.h>
+#include <stdbool.h>
 
 //display driver id
 #define INPUT_DRIVER_ID 2
@@ -21,6 +22,12 @@ typedef struct {
 } ControlState;
 
 void loadInputDriver();
+
+
+/**
+  true if input driver is loaded
+*/
+bool isInputDriverLoaded();
 
 /**
   initialize user input with default pin mappings

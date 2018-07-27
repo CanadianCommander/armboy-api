@@ -1,10 +1,15 @@
 #include "display.h"
+#include "core.h"
 #include "util.h"
 #include <memory.h>
 #include "../drivers/ssd1289/src/ssd1289SysCall.h"
 
 void loadDisplayDriver(){
   LOAD_KERNEL_MOD(DISPLAY_DRIVER_ID);
+}
+
+bool isDisplayDriverLoaded(){
+  return isLoaded(DISPLAY_DRIVER_ID);
 }
 
 void initializeDisplayDefaults(){
